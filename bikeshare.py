@@ -74,36 +74,29 @@ def time_stats(df):
 
     print('\nCalculating The Most Popular Times of Travel...\n')
     start_time = time.time()
+
     df['Start Time'] = pd.to_datetime(df['Start Time'])
     df['month'] = df['Start Time'].dt.month
-    popular_month = df['month'].mode()[0]
-    if popular_month == 1:
-        popular_month = "January"
-    elif popular_month == 2:
-        popular_month = "February"
-    elif popular_month == 3:
-        popular_month = "March"
-    elif popular_month == 4:
-        popular_month = "April"
-    elif popular_month == 5:
-        popular_month = "May"
-    elif popular_month == 6:
-        popular_month = "June"
+
+    # Mapping month numbers to names
+    month_names = ["January", "February", "March", "April", "May", "June"]
+    popular_month = month_names[df['month'].mode()[0] - 1]
     print('Most Common Month: \n', popular_month)
-    popular_day = df['day_of_week'].mode()[0] 
+
+    popular_day = df['Start Time'].dt.day_name().mode()[0]
     print('Most Common Day of the Week: \n', popular_day) 
 
-    df['hour'] = df['Start Time'].dt.hour #PB
-    popular_hour = df['hour'].mode()[0] #PB
-    if popular_hour < 12:
-        print('Most Common Start Hour: \n', popular_hour, ' AM')
-    elif popular_hour >= 12:
-        if popular_hour > 12:
-            popular_hour -= 12
-        print('Most Common Start Hour: \n', popular_hour, ' PM')
+    df['hour'] = df['Start Time'].dt.hour
+    popular_hour = df['hour'].mode()[0]
+
+    # Converting hour to 12-hour format with AM/PM
+    am_pm = "AM" if popular_hour < 12 else "PM"
+    popular_hour = popular_hour if popular_hour <= 12 else popular_hour - 12
+    print('Most Common Start Hour: \n', popular_hour, am_pm)
 
     print("\nThis took %s seconds." % (time.time() - start_time))
     print('-'*40)
+
 
 def station_stats(df):
     """Displays statistics on the most popular stations and trip."""
@@ -126,27 +119,33 @@ def station_stats(df):
 
 def trip_duration_stats(df):
     """Displays statistics on the total and average trip duration."""
-
+    
     print('\nCalculating Trip Duration...\n')
     start_time = time.time()
 
+    def format_duration(duration):
+        hour, remainder = divmod(duration, 3600)
+        minute, second = divmod(remainder, 60)
+        return hour, minute, second
     
+    # Calculate total and average duration
     total_duration = df['Trip Duration'].sum()
-    minute, second = divmod(total_duration, 60)
-    hour, minute = divmod(minute, 60)
-    print("The Total Travel Time is {} Hours, {} Minutes, and {} Seconds.".format(hour, minute, second))
+    average_duration = df['Trip Duration'].mean()
 
-    
-    average_duration = round(df['Trip Duration'].mean())
-    minute, second = divmod(average_duration, 60)
-    if minute> 60:
-        hour, minute = divmod(minute, 60)
-        print('The Average Travel Time is {} Hours, {} Minutes, and {} seconds.'.format(hour, minute, second))
+    # Format and print total duration
+    total_hour, total_minute, total_second = format_duration(total_duration)
+    print("The Total Travel Time is {} Hours, {} Minutes, and {} Seconds.".format(total_hour, total_minute, total_second))
+
+    # Format and print average duration
+    avg_hour, avg_minute, avg_second = format_duration(round(average_duration))
+    if avg_hour > 0:
+        print('The Average Travel Time is {} Hours, {} Minutes, and {} Seconds.'.format(avg_hour, avg_minute, avg_second))
     else:
-        print('The Average Trip Duration is {} Minutes and {} Seconds.'.format(minute, second))
-        
+        print('The Average Trip Duration is {} Minutes and {} Seconds.'.format(avg_minute, avg_second))
+    
     print("\nThis took %s seconds." % (time.time() - start_time))
     print('-'*40)
+
 def user_stats(df, city):
     """Displays statistics on bikeshare users."""
 
