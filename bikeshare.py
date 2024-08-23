@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import time
-
+# this is a bikeshare project welcome 😊
 """ this project to explore US bikeshare data for three cities (chicago, New York, and Washington) """
 
 CITY_DATA = {'chicago':'chicago.csv',
